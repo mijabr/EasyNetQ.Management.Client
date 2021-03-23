@@ -196,7 +196,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(exchangeName, nameof(exchangeName));
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
-            return GetAsync<Exchange>($"exchanges/{SanitiseVhostName(vhost.Name)}/{exchangeName}", cancellationToken,
+            return GetAsync<Exchange>($"exchanges/{SanitizeVhostName(vhost.Name)}/{exchangeName}", cancellationToken,
                 ratesCriteria);
         }
 
@@ -206,7 +206,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(queueName, nameof(queueName));
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
-            return GetAsync<Queue>($"queues/{SanitiseVhostName(vhost.Name)}/{SanitiseName(queueName)}",
+            return GetAsync<Queue>($"queues/{SanitizeVhostName(vhost.Name)}/{WebUtility.UrlEncode(queueName)}",
                 cancellationToken, lengthsCriteria, ratesCriteria);
         }
 
@@ -216,10 +216,10 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(vhost, nameof(exchangeInfo));
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
-            await PutAsync($"exchanges/{SanitiseVhostName(vhost.Name)}/{SanitiseName(exchangeInfo.GetName())}",
+            await PutAsync($"exchanges/{SanitizeVhostName(vhost.Name)}/{WebUtility.UrlEncode(exchangeInfo.GetName())}",
                 exchangeInfo, cancellationToken).ConfigureAwait(false);
 
-            return await GetExchangeAsync(SanitiseName(exchangeInfo.GetName()), vhost,
+            return await GetExchangeAsync(WebUtility.UrlEncode(exchangeInfo.GetName()), vhost,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -228,7 +228,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(exchange, nameof(exchange));
 
-            await DeleteAsync($"exchanges/{SanitiseVhostName(exchange.Vhost)}/{SanitiseName(exchange.Name)}",
+            await DeleteAsync($"exchanges/{SanitizeVhostName(exchange.Vhost)}/{WebUtility.UrlEncode(exchange.Name)}",
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -238,7 +238,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(exchange, nameof(exchange));
 
             return GetAsync<IEnumerable<Binding>>(
-                $"exchanges/{SanitiseVhostName(exchange.Vhost)}/{exchange.Name}/bindings/source", cancellationToken);
+                $"exchanges/{SanitizeVhostName(exchange.Vhost)}/{exchange.Name}/bindings/source", cancellationToken);
         }
 
         public Task<IEnumerable<Binding>> GetBindingsWithDestinationAsync(Exchange exchange,
@@ -247,7 +247,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(exchange, nameof(exchange));
 
             return GetAsync<IEnumerable<Binding>>(
-                $"exchanges/{SanitiseVhostName(exchange.Vhost)}/{exchange.Name}/bindings/destination",
+                $"exchanges/{SanitizeVhostName(exchange.Vhost)}/{exchange.Name}/bindings/destination",
                 cancellationToken);
         }
 
@@ -258,7 +258,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(publishInfo, nameof(publishInfo));
 
             return PostAsync<PublishInfo, PublishResult>(
-                $"exchanges/{SanitiseVhostName(exchange.Vhost)}/{exchange.Name}/publish", publishInfo,
+                $"exchanges/{SanitizeVhostName(exchange.Vhost)}/{exchange.Name}/publish", publishInfo,
                 cancellationToken);
         }
 
@@ -273,7 +273,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(queueInfo, nameof(queueInfo));
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
-            await PutAsync($"queues/{SanitiseVhostName(vhost.Name)}/{SanitiseName(queueInfo.GetName())}", queueInfo,
+            await PutAsync($"queues/{SanitizeVhostName(vhost.Name)}/{WebUtility.UrlEncode(queueInfo.GetName())}", queueInfo,
                 cancellationToken).ConfigureAwait(false);
 
             return await GetQueueAsync(queueInfo.GetName(), vhost, cancellationToken: cancellationToken)
@@ -285,7 +285,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(queue, nameof(queue));
 
-            await DeleteAsync($"queues/{SanitiseVhostName(queue.Vhost)}/{SanitiseName(queue.Name)}",
+            await DeleteAsync($"queues/{SanitizeVhostName(queue.Vhost)}/{WebUtility.UrlEncode(queue.Name)}",
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -295,14 +295,14 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(queue, nameof(queue));
 
             return GetAsync<IEnumerable<Binding>>(
-                $"queues/{SanitiseVhostName(queue.Vhost)}/{SanitiseName(queue.Name)}/bindings", cancellationToken);
+                $"queues/{SanitizeVhostName(queue.Vhost)}/{WebUtility.UrlEncode(queue.Name)}/bindings", cancellationToken);
         }
 
         public async Task PurgeAsync(Queue queue, CancellationToken cancellationToken = default(CancellationToken))
         {
             Ensure.ArgumentNotNull(queue, nameof(queue));
 
-            await DeleteAsync($"queues/{SanitiseVhostName(queue.Vhost)}/{SanitiseName(queue.Name)}/contents",
+            await DeleteAsync($"queues/{SanitizeVhostName(queue.Vhost)}/{WebUtility.UrlEncode(queue.Name)}/contents",
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -312,7 +312,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(queue, nameof(queue));
 
             return PostAsync<GetMessagesCriteria, IEnumerable<Message>>(
-                $"queues/{SanitiseVhostName(queue.Vhost)}/{SanitiseName(queue.Name)}/get", criteria, cancellationToken);
+                $"queues/{SanitizeVhostName(queue.Vhost)}/{WebUtility.UrlEncode(queue.Name)}/get", criteria, cancellationToken);
         }
 
         public Task<IEnumerable<Binding>> GetBindingsAsync(
@@ -329,7 +329,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(bindingInfo, nameof(bindingInfo));
 
             await PostAsync<BindingInfo, object>(
-                $"bindings/{SanitiseVhostName(queue.Vhost)}/e/{exchange.Name}/q/{SanitiseName(queue.Name)}",
+                $"bindings/{SanitizeVhostName(queue.Vhost)}/e/{exchange.Name}/q/{WebUtility.UrlEncode(queue.Name)}",
                 bindingInfo, cancellationToken).ConfigureAwait(false);
         }
 
@@ -341,7 +341,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(bindingInfo, nameof(bindingInfo));
 
             await PostAsync<BindingInfo, object>(
-                $"bindings/{SanitiseVhostName(sourceExchange.Vhost)}/e/{sourceExchange.Name}/e/{destinationExchange.Name}",
+                $"bindings/{SanitizeVhostName(sourceExchange.Vhost)}/e/{sourceExchange.Name}/e/{destinationExchange.Name}",
                 bindingInfo, cancellationToken).ConfigureAwait(false);
         }
 
@@ -352,7 +352,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(queue, nameof(queue));
 
             return GetAsync<IEnumerable<Binding>>(
-                $"bindings/{SanitiseVhostName(queue.Vhost)}/e/{exchange.Name}/q/{SanitiseName(queue.Name)}",
+                $"bindings/{SanitizeVhostName(queue.Vhost)}/e/{exchange.Name}/q/{WebUtility.UrlEncode(queue.Name)}",
                 cancellationToken);
         }
 
@@ -363,7 +363,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(toExchange, nameof(toExchange));
 
             return GetAsync<IEnumerable<Binding>>(
-                $"bindings/{SanitiseVhostName(toExchange.Vhost)}/e/{fromExchange.Name}/e/{SanitiseName(toExchange.Name)}",
+                $"bindings/{SanitizeVhostName(toExchange.Vhost)}/e/{fromExchange.Name}/e/{WebUtility.UrlEncode(toExchange.Name)}",
                 cancellationToken);
         }
 
@@ -388,10 +388,10 @@ namespace EasyNetQ.Management.Client
             }
 
             await DeleteAsync(string.Format("bindings/{0}/e/{1}/{2}/{3}/{4}",
-                SanitiseVhostName(binding.Vhost),
-                SanitiseName(binding.Source),
+                SanitizeVhostName(binding.Vhost),
+                WebUtility.UrlEncode(binding.Source),
                 binding.DestinationType[0], // e for exchange or q for queue
-                SanitiseName(binding.Destination),
+                WebUtility.UrlEncode(binding.Destination),
                 RecodeBindingPropertiesKey(binding.PropertiesKey)), cancellationToken).ConfigureAwait(false);
         }
 
@@ -403,7 +403,7 @@ namespace EasyNetQ.Management.Client
         public Task<Vhost> GetVhostAsync(string vhostName,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return GetAsync<Vhost>($"vhosts/{SanitiseVhostName(vhostName)}", cancellationToken);
+            return GetAsync<Vhost>($"vhosts/{SanitizeVhostName(vhostName)}", cancellationToken);
         }
 
         public async Task<Vhost> CreateVirtualHostAsync(string virtualHostName,
@@ -411,7 +411,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(virtualHostName, nameof(virtualHostName));
 
-            await PutAsync<string>($"vhosts/{SanitiseVhostName(virtualHostName)}", cancellationToken: cancellationToken)
+            await PutAsync<string>($"vhosts/{SanitizeVhostName(virtualHostName)}", cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
             return await GetVhostAsync(virtualHostName, cancellationToken).ConfigureAwait(false);
         }
@@ -421,7 +421,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
-            await DeleteAsync($"vhosts/{SanitiseVhostName(vhost.Name)}", cancellationToken).ConfigureAwait(false);
+            await DeleteAsync($"vhosts/{SanitizeVhostName(vhost.Name)}", cancellationToken).ConfigureAwait(false);
         }
 
         public async Task EnableTracingAsync(Vhost vhost,
@@ -429,7 +429,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
             vhost.Tracing = true;
-            await PutAsync<Vhost>($"vhosts/{SanitiseVhostName(vhost.Name)}", vhost, cancellationToken)
+            await PutAsync<Vhost>($"vhosts/{SanitizeVhostName(vhost.Name)}", vhost, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -438,7 +438,7 @@ namespace EasyNetQ.Management.Client
         {
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
             vhost.Tracing = false;
-            await PutAsync<Vhost>($"vhosts/{SanitiseVhostName(vhost.Name)}", vhost, cancellationToken)
+            await PutAsync<Vhost>($"vhosts/{SanitizeVhostName(vhost.Name)}", vhost, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -541,7 +541,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(permissionInfo, nameof(permissionInfo));
 
             await PutAsync(
-                $"permissions/{SanitiseVhostName(permissionInfo.GetVirtualHostName())}/{permissionInfo.GetUserName()}",
+                $"permissions/{SanitizeVhostName(permissionInfo.GetVirtualHostName())}/{permissionInfo.GetUserName()}",
                 permissionInfo, cancellationToken).ConfigureAwait(false);
         }
 
@@ -581,7 +581,7 @@ namespace EasyNetQ.Management.Client
             Ensure.ArgumentNotNull(vhost, nameof(vhost));
 
             var result =
-                await GetAsync<AlivenessTestResult>($"aliveness-test/{SanitiseVhostName(vhost.Name)}",
+                await GetAsync<AlivenessTestResult>($"aliveness-test/{SanitizeVhostName(vhost.Name)}",
                     cancellationToken).ConfigureAwait(false);
             return result.Status == "ok";
         }
@@ -722,12 +722,12 @@ namespace EasyNetQ.Management.Client
 
         private static string GetPolicyUrl(string policyName, string vhost)
         {
-            return $"policies/{SanitiseVhostName(vhost)}/{policyName}";
+            return $"policies/{SanitizeVhostName(vhost)}/{policyName}";
         }
 
         private static string GetParameterUrl(string componentName, string vhost, string parameterName)
         {
-            return $"parameters/{componentName}/{SanitiseVhostName(vhost)}/{parameterName}";
+            return $"parameters/{componentName}/{SanitizeVhostName(vhost)}/{parameterName}";
         }
 
         private static Task<T> DeserializeResponseAsync<T>(HttpResponseMessage response)
@@ -777,14 +777,9 @@ namespace EasyNetQ.Management.Client
             return queryStringBuilder.ToString();
         }
 
-        private static string SanitiseVhostName(string vhostName)
+        private static string SanitizeVhostName(string vhostName)
         {
             return vhostName.Replace("/", "%2f");
-        }
-
-        private static string SanitiseName(string name)
-        {
-            return WebUtility.UrlEncode(name);
         }
 
         private static string RecodeBindingPropertiesKey(string propertiesKey)
